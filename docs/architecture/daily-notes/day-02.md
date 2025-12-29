@@ -22,8 +22,6 @@
 - Data flows down through props, events bubble up
 - Side effects are handled in useEffect hook
 
-## Challenges Encountered
-- [Document any issues faced]
 
 ## Next Steps (Day 3)
 - Implement React Router for page navigation
