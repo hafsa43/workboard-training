@@ -1,15 +1,12 @@
 import { Layout } from './components/Layout';
+import { ComponentDemo } from './components/ComponentDemo';
 function App() {
   return (
     <Layout>
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Welcome to WorkBoard
-        </h2>
-        <p className="text-gray-600">
-          Your project and task management application.
-        </p>
-      </div>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">
+        Component Library Demo
+      </h1>
+      <ComponentDemo />
     </Layout>
   );
 }
