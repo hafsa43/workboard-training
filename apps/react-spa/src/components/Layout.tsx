@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/Button';
 interface LayoutProps {
   children: ReactNode;
@@ -7,8 +8,9 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
+    logout();
     navigate('/login');
   };
   const isActive = (path: string) => {
@@ -20,7 +22,12 @@ export function Layout({ children }: LayoutProps) {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">WorkBoard</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">WorkBoard</h1>
+              {user && (
+                <p className="text-sm text-gray-600">Welcome, {user.name}</p>
+              )}
+            </div>
             <Button variant="secondary" onClick={handleLogout}>
               Logout
             </Button>
