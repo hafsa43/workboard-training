@@ -85,8 +85,4 @@ components/tasks/ (TaskBoard, TaskCard, TaskColumn, TaskFormModal)
 ```
 
 ## Next Steps
-- Add drag-and-drop between columns
-- Implement task filtering and sorting
-- Add due dates and assignees
-- Task detail view with comments
-- Real-time collaboration with WebSockets
+- Day 8: Search, filters, pagination/virtualization
