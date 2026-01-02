@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { ProjectFormModal } from '../components/projects/ProjectFormModal';
+import { Button } from '../components/ui/Button.tsx';
+import { Card } from '../components/ui/Card.tsx';
+import { ProjectFormModal } from '../components/projects/ProjectFormModal.tsx';
+import { TaskBoard } from '../components/tasks/TaskBoard.tsx';
 import { useProject, useUpdateProject, useDeleteProject } from '../hooks/useProjects';
 import type { ProjectCreateFormData } from '../schemas/project.schema';
 
@@ -142,6 +143,13 @@ export function ProjectDetailPage() {
             </div>
           </div>
         </Card>
+
+        {/* Task Board */}
+        {projectId && (
+          <div className="mt-8">
+            <TaskBoard projectId={projectId} />
+          </div>
+        )}
       </div>
 
       <ProjectFormModal

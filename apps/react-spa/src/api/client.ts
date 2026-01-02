@@ -98,4 +98,29 @@ export const apiClient = {
 
     return response.json();
   },
+
+  async patch<T>(endpoint: string, data: unknown): Promise<T> {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new ApiError(
+        errorData?.message || 'Failed to patch resource',
+        response.status,
+        errorData
+      );
+    }
+
+    return response.json();
+  },
+
+  isMockMode(): boolean {
+    return import.meta.env.VITE_USE_MOCK === 'true' || true; // Always use mock for now
+  },
 };

@@ -1,10 +1,17 @@
+export type ProjectStatus = 'active' | 'completed' | 'archived';
+
 export interface Project {
   id: string;
   name: string;
   description?: string;
-  status: 'active' | 'completed' | 'archived';
+  status: ProjectStatus;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ProjectsResponse {
+  projects: Project[];
+  total: number;
 }
 
 export interface CreateProjectDto {
@@ -15,10 +22,5 @@ export interface CreateProjectDto {
 export interface UpdateProjectDto {
   name?: string;
   description?: string;
-  status?: 'active' | 'completed' | 'archived';
-}
-
-export interface ProjectsResponse {
-  projects: Project[];
-  total: number;
+  status?: ProjectStatus;
 }
