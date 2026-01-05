@@ -14,7 +14,7 @@ let projects: Project[] = [
     id: '2',
     name: 'Mobile App Development',
     description: 'Build iOS and Android apps',
-    status: 'active',
+    status: 'archived',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -23,6 +23,78 @@ let projects: Project[] = [
     name: 'API Migration',
     description: 'Migrate from REST to GraphQL',
     status: 'completed',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '4',
+    name: 'E-commerce Platform',
+    description: 'Build online shopping platform',
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '5',
+    name: 'Customer Portal',
+    description: 'Self-service customer portal',
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '6',
+    name: 'Data Analytics Dashboard',
+    description: 'Real-time analytics and reporting',
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '7',
+    name: 'Marketing Campaign',
+    description: 'Q1 2026 marketing initiatives',
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '8',
+    name: 'Infrastructure Upgrade',
+    description: 'Cloud infrastructure migration',
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '9',
+    name: 'Security Audit',
+    description: 'Comprehensive security review',
+    status: 'completed',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '10',
+    name: 'Training Program',
+    description: 'Employee skill development',
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '11',
+    name: 'Product Launch',
+    description: 'New product line introduction',
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '12',
+    name: 'Legacy System Retirement',
+    description: 'Decommission old systems',
+    status: 'archived',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -79,11 +151,42 @@ seedTasks();
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const mockApi = {
-  async getProjects(): Promise<ProjectsResponse> {
+  async getProjects(filters?: { search?: string; status?: 'active' | 'archived' | 'completed' | 'all' }, pagination?: { page: number; pageSize: number }): Promise<ProjectsResponse> {
     await delay(1500);
+    
+    let filteredProjects = [...projects];
+    
+    // Apply search filter
+    if (filters?.search) {
+      const searchLower = filters.search.toLowerCase();
+      filteredProjects = filteredProjects.filter(p =>
+        p.name.toLowerCase().includes(searchLower) ||
+        p.description?.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Apply status filter
+    if (filters?.status && filters.status !== 'all') {
+      filteredProjects = filteredProjects.filter(p => p.status === filters.status);
+    }
+    
+    const total = filteredProjects.length;
+    const pageSize = pagination?.pageSize || 10;
+    const totalPages = Math.ceil(total / pageSize);
+    
+    // Apply pagination
+    if (pagination) {
+      const start = (pagination.page - 1) * pagination.pageSize;
+      const end = start + pagination.pageSize;
+      filteredProjects = filteredProjects.slice(start, end);
+    }
+    
     return {
-      projects: [...projects],
-      total: projects.length,
+      projects: filteredProjects,
+      total,
+      page: pagination?.page,
+      pageSize: pagination?.pageSize,
+      totalPages,
     };
   },
 

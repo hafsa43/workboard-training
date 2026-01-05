@@ -1,13 +1,37 @@
 import { apiClient } from './client';
 import { mockServer } from './mockServer';
 import type { Task, CreateTaskDTO, UpdateTaskDTO, TaskStatus } from '../types/task';
+import type { TaskFilters } from '../utils/filterTypes';
 
 export const tasksApi = {
-  getAll: async (projectId: string): Promise<Task[]> => {
+  getAll: async (projectId: string, filters?: TaskFilters): Promise<Task[]> => {
     if (apiClient.isMockMode()) {
-      return mockServer.getTasks(projectId);
+      let tasks = await mockServer.getTasks(projectId);
+      
+      // Apply filters
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase();
+        tasks = tasks.filter(t =>
+          t.title.toLowerCase().includes(searchLower) ||
+          t.description?.toLowerCase().includes(searchLower)
+        );
+      }
+      if (filters?.priority && filters.priority !== 'all') {
+        tasks = tasks.filter(t => t.priority === filters.priority);
+      }
+      if (filters?.status && filters.status !== 'all') {
+        tasks = tasks.filter(t => t.status === filters.status);
+      }
+      
+      return tasks;
     }
-    return apiClient.get<Task[]>(`/projects/${projectId}/tasks`);
+    
+    const params = new URLSearchParams();
+    if (filters?.search) params.set('search', filters.search);
+    if (filters?.priority) params.set('priority', filters.priority);
+    if (filters?.status) params.set('status', filters.status);
+    
+    return apiClient.get<Task[]>(`/projects/${projectId}/tasks?${params}`);
   },
 
   getById: async (id: string): Promise<Task> => {
