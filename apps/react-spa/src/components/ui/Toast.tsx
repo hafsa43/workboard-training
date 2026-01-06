@@ -1,52 +1,63 @@
 import { useEffect } from 'react';
+
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
+
 interface ToastProps {
-  message: string;
+  id: string;
   type: ToastType;
-  onClose: () => void;
+  message: string;
+  onClose: (id: string) => void;
   duration?: number;
 }
-export function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
+
+const icons = {
+  success: '✓',
+  error: '✕',
+  info: 'ℹ',
+  warning: '⚠',
+};
+
+const styles = {
+  success: 'bg-green-500',
+  error: 'bg-red-500',
+  info: 'bg-blue-500',
+  warning: 'bg-yellow-500',
+};
+
+const ariaLabels = {
+  success: 'Success',
+  error: 'Error',
+  info: 'Information',
+  warning: 'Warning',
+};
+
+export function Toast({ id, type, message, onClose, duration = 3000 }: ToastProps) {
   useEffect(() => {
-    const timer = setTimeout(onClose, duration);
-    return () => clearTimeout(timer);
-  }, [duration, onClose]);
-  const typeStyles = {
-    success: 'bg-green-500',
-    error: 'bg-red-500',
-    info: 'bg-blue-500',
-    warning: 'bg-yellow-500',
-  };
+    if (duration > 0) {
+      const timer = setTimeout(() => onClose(id), duration);
+      return () => clearTimeout(timer);
+    }
+  }, [id, duration, onClose]);
+
   return (
-    <div className={`${typeStyles[type]} text-white px-6 py-4 rounded-lg shadow-lg`}>
-      <div className="flex items-center justify-between">
-        <p>{message}</p>
-        <button
-          onClick={onClose}
-          className="ml-4 text-white hover:text-gray-200"
-        >
-          &times;
-        </button>
-      </div>
-    </div>
-  );
-}
-// Toast Container Component
-interface ToastContainerProps {
-  toasts: Array<{ id: string; message: string; type: ToastType }>;
-  removeToast: (id: string) => void;
-}
-export function ToastContainer({ toasts, removeToast }: ToastContainerProps) {
-  return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
+    <div
+      className={`${styles[type]} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-md`}
+      role="alert"
+      aria-live={type === 'error' ? 'assertive' : 'polite'}
+      aria-atomic="true"
+    >
+      <span className="text-2xl" aria-hidden="true">
+        {icons[type]}
+      </span>
+      <span className="sr-only">{ariaLabels[type]}:</span>
+      <p className="flex-1">{message}</p>
+      <button
+        onClick={() => onClose(id)}
+        className="text-white hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-white rounded-md p-1"
+        aria-label="Dismiss notification"
+      >
+        <span aria-hidden="true">×</span>
+      </button>
     </div>
   );
 }

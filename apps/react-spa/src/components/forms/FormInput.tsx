@@ -1,16 +1,19 @@
-import type { InputHTMLAttributes} from 'react';
+import type { InputHTMLAttributes } from 'react';
 import { forwardRef } from 'react';
 import type { FieldError } from 'react-hook-form';
+
 interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: FieldError;
   helperText?: string;
 }
+
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ label, error, helperText, className = '', id, ...props }, ref) => {
     const inputId = id || `input-${label.toLowerCase().replace(/\s+/g, '-')}`;
     const errorId = `${inputId}-error`;
     const helperId = `${inputId}-helper`;
+
     return (
       <div className="w-full">
         <label
@@ -18,9 +21,13 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           className="block text-sm font-medium text-gray-700 mb-1"
         >
           {label}
-          {props.required && <span className="text-red-500 ml-1">*</span>}
+          {props.required && (
+            <span className="text-red-500 ml-1" aria-label="required">
+              *
+            </span>
+          )}
         </label>
-        
+
         <input
           ref={ref}
           id={inputId}
@@ -37,20 +44,26 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           }
           {...props}
         />
-        
+
         {helperText && !error && (
           <p id={helperId} className="mt-1 text-sm text-gray-500">
             {helperText}
           </p>
         )}
-        
+
         {error && (
-          <p id={errorId} className="mt-1 text-sm text-red-600" role="alert">
-            {error.message}
+          <p 
+            id={errorId} 
+            className="mt-1 text-sm text-red-600" 
+            role="alert"
+            aria-live="assertive"
+          >
+            {typeof error === 'string' ? error : error.message}
           </p>
         )}
       </div>
     );
   }
 );
+
 FormInput.displayName = 'FormInput';
