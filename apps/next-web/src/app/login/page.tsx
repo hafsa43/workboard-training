@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
-import { Button, Input, Card } from '@/components/ui';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card } from '@/components/ui/Card';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -14,23 +16,35 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('=== LOGIN STARTED ===');
-    console.log('Email:', email);
+    console.log('Form submitted!');
     setIsLoading(true);
 
     // Mock authentication
-    const mockUser = { id: '1', email, name: email.split('@')[0] };
-    const mockToken = 'mock-jwt-token-' + Date.now();
-    
-    console.log('Setting user:', mockUser);
-    setUser(mockUser);
-    setToken(mockToken);
-    
-    console.log('Auth set, navigating...');
     setTimeout(() => {
-      console.log('Navigating to dashboard');
-      window.location.href = '/dashboard';
-    }, 200);
+      const mockUser = { id: '1', email, name: email.split('@')[0] };
+      const mockToken = 'mock-jwt-token-' + Date.now();
+      
+      console.log('Setting user:', mockUser);
+      
+      // Set in Zustand
+      setUser(mockUser);
+      setToken(mockToken);
+      
+      // Also set in localStorage directly as backup
+      localStorage.setItem('workboard-user', JSON.stringify(mockUser));
+      localStorage.setItem('workboard-token', mockToken);
+      
+      console.log('LocalStorage set:', localStorage.getItem('workboard-user'));
+      console.log('Zustand state:', useAuthStore.getState());
+      
+      setIsLoading(false);
+      
+      // Navigate
+      setTimeout(() => {
+        console.log('Navigating to dashboard...');
+        window.location.href = '/dashboard';
+      }, 100);
+    }, 1000);
   };
 
   return (
@@ -44,7 +58,6 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            autoComplete="email"
             required
           />
           <Input
@@ -53,16 +66,10 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            autoComplete="current-password"
             required
           />
-          <Button 
-            type="submit" 
-            className="w-full mt-6" 
-            isLoading={isLoading}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+          <Button type="submit" className="w-full" isLoading={isLoading}>
+            Sign In
           </Button>
         </form>
       </Card>

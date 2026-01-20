@@ -1,4 +1,5 @@
 import type { Project } from '@/types/project';
+import type { Task, CreateTaskDTO, UpdateTaskDTO } from '@/types/task';
 
 const mockProjects: Project[] = [
   {
@@ -143,5 +144,119 @@ export const mockServer = {
     const index = mockProjects.findIndex(p => p.id === id);
     if (index === -1) throw new Error('Project not found');
     mockProjects.splice(index, 1);
+    // Also delete tasks for this project
+    mockTasks = mockTasks.filter(t => t.projectId !== id);
+  },
+};
+
+// Mock tasks data
+let mockTasks: Task[] = [
+  {
+    id: '1',
+    projectId: '1',
+    title: 'Design homepage mockup',
+    description: 'Create wireframes and high-fidelity mockups',
+    status: 'done',
+    priority: 'high',
+    createdAt: new Date('2024-01-10').toISOString(),
+    updatedAt: new Date('2024-01-12').toISOString(),
+  },
+  {
+    id: '2',
+    projectId: '1',
+    title: 'Develop navigation component',
+    description: 'Build responsive navigation with mobile menu',
+    status: 'doing',
+    priority: 'high',
+    createdAt: new Date('2024-01-11').toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '3',
+    projectId: '1',
+    title: 'Setup hosting',
+    description: 'Configure Vercel deployment',
+    status: 'todo',
+    priority: 'medium',
+    createdAt: new Date('2024-01-12').toISOString(),
+    updatedAt: new Date('2024-01-12').toISOString(),
+  },
+  {
+    id: '4',
+    projectId: '2',
+    title: 'Setup React Native project',
+    description: 'Initialize app with TypeScript and navigation',
+    status: 'done',
+    priority: 'high',
+    createdAt: new Date('2024-01-15').toISOString(),
+    updatedAt: new Date('2024-01-16').toISOString(),
+  },
+  {
+    id: '5',
+    projectId: '2',
+    title: 'Build authentication screens',
+    description: 'Login, signup, forgot password',
+    status: 'doing',
+    priority: 'high',
+    createdAt: new Date('2024-01-16').toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '6',
+    projectId: '2',
+    title: 'Integrate push notifications',
+    description: 'Setup Firebase Cloud Messaging',
+    status: 'todo',
+    priority: 'medium',
+    createdAt: new Date('2024-01-17').toISOString(),
+    updatedAt: new Date('2024-01-17').toISOString(),
+  },
+];
+
+export const mockTasksServer = {
+  getTasks: async (projectId: string): Promise<Task[]> => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return mockTasks.filter(t => t.projectId === projectId);
+  },
+
+  getTask: async (id: string): Promise<Task | undefined> => {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return mockTasks.find(t => t.id === id);
+  },
+
+  createTask: async (data: CreateTaskDTO): Promise<Task> => {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    const newTask: Task = {
+      id: String(Date.now()),
+      projectId: data.projectId,
+      title: data.title,
+      description: data.description,
+      status: data.status || 'todo',
+      priority: data.priority || 'medium',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    mockTasks.unshift(newTask);
+    return newTask;
+  },
+
+  updateTask: async (id: string, data: UpdateTaskDTO): Promise<Task> => {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    const index = mockTasks.findIndex(t => t.id === id);
+    if (index === -1) throw new Error('Task not found');
+    
+    mockTasks[index] = {
+      ...mockTasks[index],
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    return mockTasks[index];
+  },
+
+  deleteTask: async (id: string): Promise<void> => {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    const index = mockTasks.findIndex(t => t.id === id);
+    if (index === -1) throw new Error('Task not found');
+    mockTasks.splice(index, 1);
   },
 };

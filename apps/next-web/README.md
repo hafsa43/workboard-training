@@ -12,12 +12,10 @@ Next.js 14+ application with App Router for workboard project management.
 
 ## Getting Started
 
-```bash
 npm run dev      # Development server (port 3000)
 npm run build    # Production build
 npm run start    # Production server
 npm run lint     # ESLint check
-```
 
 ## Project Structure
 ```

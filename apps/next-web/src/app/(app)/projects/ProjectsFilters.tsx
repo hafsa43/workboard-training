@@ -36,6 +36,7 @@ export function ProjectsFilters({ initialFilters }: ProjectsFiltersProps) {
 
     params.set('page', '1'); // Reset to page 1 on filter change
     router.push(`/projects?${params.toString()}`);
+    router.refresh(); // Force server component to re-fetch
   };
 
   const handleSearch = () => {
@@ -51,6 +52,7 @@ export function ProjectsFilters({ initialFilters }: ProjectsFiltersProps) {
     setSearch('');
     setStatus('all');
     router.push('/projects');
+    router.refresh(); // Force server component to re-fetch
   };
 
   return (
@@ -92,5 +94,4 @@ export function ProjectsFilters({ initialFilters }: ProjectsFiltersProps) {
       </div>
     </div>
   );
-
 }
