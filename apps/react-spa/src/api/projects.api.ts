@@ -1,11 +1,11 @@
-import { apiClient } from './client';
-import { mockApi } from './mockServer';
+import { apiClient } from './client.ts';
+import { mockApi } from './mockServer.ts';
 import type { 
   Project, 
   ProjectsResponse, 
   CreateProjectDto, 
   UpdateProjectDto 
-} from '../types/project';
+} from '../types/project.ts';
 
 const USE_MOCK_API = true;
 
