@@ -6,32 +6,32 @@ import { FormInput } from '../forms/FormInput';
 import { FormTextarea } from '../forms/FormTextarea';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
+
 interface ProjectFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: ProjectCreateFormData) => Promise<void>;
-  initialData?: ProjectCreateFormData;
-  mode: 'create' | 'edit';
+  initialData?: { name: string; description?: string };
+  isSubmitting?: boolean;
+  mode?: 'create' | 'edit';
 }
 export function ProjectFormModal({
   isOpen,
   onClose,
   onSubmit,
   initialData,
-  mode,
+  isSubmitting = false,
+  mode = 'create',
 }: ProjectFormModalProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm<ProjectCreateFormData>({
-    resolver: zodResolver(projectCreateSchema),
-    defaultValues: initialData || {
-      name: '',
-      description: '',
-    },
-  });
+ const {
+  register,
+  handleSubmit,
+  reset,
+  formState: { errors },
+} = useForm<ProjectCreateFormData>({
+  resolver: zodResolver(projectCreateSchema),
+  defaultValues: initialData,
+});
   const handleFormSubmit = async (data: ProjectCreateFormData) => {
     try {
       await onSubmit(data);
@@ -46,11 +46,11 @@ export function ProjectFormModal({
     onClose();
   };
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title={mode === 'create' ? 'Create New Project' : 'Edit Project'}
-    >
+   <Modal
+  isOpen={isOpen}
+  onClose={handleClose}
+  title={mode === 'create' ? 'Create New Project' : 'Edit Project'}
+>
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormInput
           label="Project Name"
@@ -80,14 +80,14 @@ export function ProjectFormModal({
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting
-              ? mode === 'create'
-                ? 'Creating...'
-                : 'Saving...'
-              : mode === 'create'
-              ? 'Create Project'
-              : 'Save Changes'}
-          </Button>
+    {isSubmitting
+      ? mode === 'create'
+        ? 'Creating...'
+        : 'Updating...'
+      : mode === 'create'
+      ? 'Create Project'
+      : 'Update Project'}
+  </Button>
         </div>
       </form>
     </Modal>

@@ -1,124 +1,159 @@
 import { useState } from 'react';
-import { Card } from '../components/ui/Card';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
 import { ProjectFormModal } from '../components/projects/ProjectFormModal';
-import { useUIStore } from '../stores/uiStore';
+import { useProjects, useCreateProject } from '../hooks/useProjects';
 import type { ProjectCreateFormData } from '../schemas/project.schema';
-interface Project {
-  id: string;
-  name: string;
-  description?: string;
-}
+
 export function ProjectsPage() {
-  // ✅ Use Zustand ONLY for toasts (global UI)
-  const addToast = useUIStore((state) => state.addToast);
-  
-  // ✅ Keep projects in LOCAL state (not Zustand)
-  const [projects, setProjects] = useState<Project[]>([
-    { id: '1', name: 'Website Redesign', description: 'Modernize company website' },
-    { id: '2', name: 'Mobile App', description: 'Build iOS and Android app' },
-    { id: '3', name: 'API Integration', description: 'Connect to third-party services' },
-  ]);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const handleCreateProject = async (data: ProjectCreateFormData) => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const newProject: Project = {
-      id: Date.now().toString(),
-      name: data.name,
-      description: data.description,
-    };
-    setProjects([...projects, newProject]);
-    
-    addToast({
-      type: 'success',
-      message: `Project "${data.name}" created successfully!`,
+  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { data, isLoading, isError, error } = useProjects();
+  const createProject = useCreateProject();
+
+  const handleCreateProject = async (formData: ProjectCreateFormData) => {
+    await createProject.mutateAsync({
+      name: formData.name,
+      description: formData.description || undefined,
     });
+    setIsModalOpen(false);
   };
-  const handleEditProject = async (data: ProjectCreateFormData) => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    if (editingProject) {
-      setProjects(
-        projects.map((p) =>
-          p.id === editingProject.id
-            ? { ...p, name: data.name, description: data.description }
-            : p
-        )
-      );
-      
-      addToast({
-        type: 'success',
-        message: `Project "${data.name}" updated successfully!`,
-      });
-      
-      setEditingProject(null);
-    }
+
+  const handleProjectClick = (projectId: string) => {
+    navigate(`/projects/${projectId}`);
   };
-  const handleDeleteProject = (id: string) => {
-    const project = projects.find((p) => p.id === id);
-    
-    if (confirm('Are you sure you want to delete this project?')) {
-      setProjects(projects.filter((p) => p.id !== id));
-      
-      addToast({
-        type: 'info',
-        message: `Project "${project?.name}" deleted.`,
-      });
-    }
-  };
-  return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          New Project
-        </Button>
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-white rounded-lg shadow-md p-6 animate-pulse"
+            >
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((project) => (
-          <Card key={project.id} title={project.name}>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+        </div>
+        <Card>
+          <div className="text-center py-12">
+            <div className="text-red-500 text-5xl mb-4">⚠️</div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Failed to Load Projects
+            </h3>
             <p className="text-gray-600 mb-4">
-              {project.description || 'No description'}
+              {error instanceof Error ? error.message : 'An error occurred'}
             </p>
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setEditingProject(project)}
-              >
-                Edit
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => handleDeleteProject(project.id)}
-              >
-                Delete
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  const projects = data?.projects || [];
+
+  if (projects.length === 0) {
+    return (
+      <>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+            <Button onClick={() => setIsModalOpen(true)}>New Project</Button>
+          </div>
+          <Card>
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-5xl mb-4">📋</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No Projects Yet
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Get started by creating your first project
+              </p>
+              <Button onClick={() => setIsModalOpen(true)}>
+                Create First Project
               </Button>
             </div>
           </Card>
-        ))}
-      </div>
-      {/* Create Modal */}
-      <ProjectFormModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={handleCreateProject}
-        mode="create"
-      />
-      {/* Edit Modal */}
-      {editingProject && (
+        </div>
+
         <ProjectFormModal
-          isOpen={!!editingProject}
-          onClose={() => setEditingProject(null)}
-          onSubmit={handleEditProject}
-          initialData={{
-            name: editingProject.name,
-            description: editingProject.description || '',
-          }}
-          mode="edit"
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleCreateProject}
+          isSubmitting={createProject.isPending}
         />
-      )}
-    </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+          <Button onClick={() => setIsModalOpen(true)}>New Project</Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project) => (
+            <div
+              key={project.id}
+              className="cursor-pointer"
+              onClick={() => handleProjectClick(project.id)}
+            >
+              <Card className="hover:shadow-lg transition-shadow">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {project.name}
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {project.description || 'No description'}
+                </p>
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                      project.status === 'active'
+                        ? 'bg-green-100 text-green-800'
+                        : project.status === 'completed'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
+                    {project.status}
+                  </span>
+                </div>
+              </Card>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <ProjectFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCreateProject}
+        isSubmitting={createProject.isPending}
+      />
+    </>
   );
 }
