@@ -3,11 +3,12 @@ import { mockServer } from '@/lib/mockServer';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const project = await mockServer.getProject(params.id);
-    
+    const { id } = await params;
+    const project = await mockServer.getProject(id);
+
     if (!project) {
       return NextResponse.json(
         { error: 'Project not found' },
@@ -15,9 +16,13 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(project);
+    return NextResponse.json(project, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+      },
+    });
   } catch (error) {
-    console.error(`GET /api/projects/${params.id} error:`, error);
+    console.error('GET /api/projects/[id] error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch project' },
       { status: 500 }
@@ -27,16 +32,17 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     
-    const project = await mockServer.updateProject(params.id, body);
+    const project = await mockServer.updateProject(id, body);
     
     return NextResponse.json(project);
   } catch (error) {
-    console.error(`PATCH /api/projects/${params.id} error:`, error);
+    console.error('PATCH /api/projects/[id] error:', error);
     
     if (error instanceof Error && error.message === 'Project not found') {
       return NextResponse.json(
@@ -54,14 +60,15 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await mockServer.deleteProject(params.id);
+    const { id } = await params;
+    await mockServer.deleteProject(id);
     
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error(`DELETE /api/projects/${params.id} error:`, error);
+    console.error('DELETE /api/projects/[id] error:', error);
     
     if (error instanceof Error && error.message === 'Project not found') {
       return NextResponse.json(

@@ -21,6 +21,7 @@ export function PaginationControls({
     const params = new URLSearchParams(searchParams);
     params.set('page', String(page));
     router.push(`/projects?${params.toString()}`);
+    router.refresh(); // Force server component to re-fetch
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
