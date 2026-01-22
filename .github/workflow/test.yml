@@ -1,0 +1,38 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: apps/react-spa/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: apps/react-spa
+        run: npm ci
+      
+      - name: Run tests
+        working-directory: apps/react-spa
+        run: npm run test:run
+      
+      - name: Generate coverage
+        working-directory: apps/react-spa
+        run: npm run test:coverage
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: apps/react-spa/coverage/coverage-final.json
