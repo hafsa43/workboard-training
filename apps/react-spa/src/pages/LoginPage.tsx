@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuthStore } from '../stores/authStore';
+import { useUIStore } from '../stores/uiStore';
 import { loginSchema } from '../schemas/auth.schema';
 import type { LoginFormData } from '../schemas/auth.schema';
 import { FormInput } from '../components/forms/FormInput';
@@ -11,7 +12,8 @@ import { Card } from '../components/ui/Card';
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated } = useAuthStore();
+  const addToast = useUIStore((state) => state.addToast);
   const {
     register,
     handleSubmit,
@@ -34,10 +36,21 @@ export function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       await login(data.email, data.password);
+      
+      // Show success toast
+      addToast({
+        type: 'success',
+        message: 'Login successful! Welcome back.',
+      });
       // Navigation happens automatically via useEffect
     } catch (err) {
       setError('root', {
         message: 'Login failed. Please check your credentials.',
+      });
+      // Show error toast
+      addToast({
+        type: 'error',
+        message: 'Login failed. Please try again.',
       });
     }
   };
