@@ -1,16 +1,19 @@
 import type { TextareaHTMLAttributes } from 'react';
 import { forwardRef } from 'react';
 import type { FieldError } from 'react-hook-form';
+
 interface FormTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
   error?: FieldError;
   helperText?: string;
 }
+
 export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
   ({ label, error, helperText, className = '', id, ...props }, ref) => {
     const textareaId = id || `textarea-${label.toLowerCase().replace(/\s+/g, '-')}`;
     const errorId = `${textareaId}-error`;
     const helperId = `${textareaId}-helper`;
+
     return (
       <div className="w-full">
         <label
@@ -18,9 +21,13 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
           className="block text-sm font-medium text-gray-700 mb-1"
         >
           {label}
-          {props.required && <span className="text-red-500 ml-1">*</span>}
+          {props.required && (
+            <span className="text-red-500 ml-1" aria-label="required">
+              *
+            </span>
+          )}
         </label>
-        
+
         <textarea
           ref={ref}
           id={textareaId}
@@ -37,20 +44,26 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
           }
           {...props}
         />
-        
+
         {helperText && !error && (
           <p id={helperId} className="mt-1 text-sm text-gray-500">
             {helperText}
           </p>
         )}
-        
+
         {error && (
-          <p id={errorId} className="mt-1 text-sm text-red-600" role="alert">
-            {error.message}
+          <p 
+            id={errorId} 
+            className="mt-1 text-sm text-red-600" 
+            role="alert"
+            aria-live="assertive"
+          >
+            {typeof error === 'string' ? error : error.message}
           </p>
         )}
       </div>
     );
   }
 );
+
 FormTextarea.displayName = 'FormTextarea';
