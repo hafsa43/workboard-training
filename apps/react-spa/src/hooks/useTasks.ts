@@ -1,36 +1,34 @@
 import { useState, useEffect, useCallback } from 'react';
 import { tasksApi } from '../api/tasks.api';
 import type { Task, CreateTaskDTO, UpdateTaskDTO, TaskStatus } from '../types/task';
+import type { TaskFilters } from '../utils/filterTypes';
 import { useUIStore } from '../stores/uiStore';
 
-export const useTasks = (projectId: string) => {
+export const useTasks = (projectId: string, filters?: TaskFilters) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const showToast = useUIStore(state => state.showToast);
+  const addToast = useUIStore(state => state.addToast);
 
-  // Fetch tasks
   const fetchTasks = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await tasksApi.getAll(projectId);
+      const data = await tasksApi.getAll(projectId, filters);
       setTasks(data);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch tasks';
       setError(message);
-      showToast(message, 'error');
+      addToast({ message, type: 'error' });
     } finally {
       setIsLoading(false);
     }
-  }, [projectId, showToast]);
+  }, [projectId, filters, addToast]);
 
-  // Load tasks on mount
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
 
-  // Create task with optimistic UI
   const createTask = useCallback(async (data: CreateTaskDTO) => {
     const optimisticTask: Task = {
       id: `temp-${Date.now()}`,
@@ -43,30 +41,25 @@ export const useTasks = (projectId: string) => {
       updatedAt: new Date().toISOString(),
     };
 
-    // Optimistic update
     setTasks(prev => [...prev, optimisticTask]);
 
     try {
       const newTask = await tasksApi.create(data);
-      // Replace optimistic task with real one
       setTasks(prev => prev.map(t => t.id === optimisticTask.id ? newTask : t));
-      showToast('Task created successfully', 'success');
+      addToast({ message: 'Task created successfully', type: 'success' });
       return newTask;
     } catch (err) {
-      // Rollback on error
       setTasks(prev => prev.filter(t => t.id !== optimisticTask.id));
       const message = err instanceof Error ? err.message : 'Failed to create task';
-      showToast(message, 'error');
+      addToast({ message, type: 'error' });
       throw err;
     }
-  }, [showToast]);
+  }, [addToast]);
 
-  // Update task with optimistic UI
   const updateTask = useCallback(async (id: string, data: UpdateTaskDTO) => {
     const oldTask = tasks.find(t => t.id === id);
     if (!oldTask) return;
 
-    // Optimistic update
     setTasks(prev => prev.map(t => 
       t.id === id 
         ? { ...t, ...data, updatedAt: new Date().toISOString() }
@@ -76,45 +69,39 @@ export const useTasks = (projectId: string) => {
     try {
       const updated = await tasksApi.update(id, data);
       setTasks(prev => prev.map(t => t.id === id ? updated : t));
-      showToast('Task updated successfully', 'success');
+      addToast({ message: 'Task updated successfully', type: 'success' });
       return updated;
     } catch (err) {
-      // Rollback on error
       setTasks(prev => prev.map(t => t.id === id ? oldTask : t));
       const message = err instanceof Error ? err.message : 'Failed to update task';
-      showToast(message, 'error');
+      addToast({ message, type: 'error' });
       throw err;
     }
-  }, [tasks, showToast]);
+  }, [tasks, addToast]);
 
-  // Delete task with optimistic UI
   const deleteTask = useCallback(async (id: string) => {
     const oldTask = tasks.find(t => t.id === id);
     if (!oldTask) return;
 
-    // Optimistic update
     setTasks(prev => prev.filter(t => t.id !== id));
 
     try {
       await tasksApi.delete(id);
-      showToast('Task deleted successfully', 'success');
+      addToast({ message: 'Task deleted successfully', type: 'success' });
     } catch (err) {
-      // Rollback on error
       setTasks(prev => [...prev, oldTask]);
       const message = err instanceof Error ? err.message : 'Failed to delete task';
-      showToast(message, 'error');
+      addToast({ message, type: 'error' });
       throw err;
     }
-  }, [tasks, showToast]);
+  }, [tasks, addToast]);
 
-  // Update task status with optimistic UI
   const updateTaskStatus = useCallback(async (id: string, status: TaskStatus) => {
     const oldTask = tasks.find(t => t.id === id);
     if (!oldTask) return;
 
-    // Optimistic update
-    setTasks(prev => prev.map(t => 
-      t.id === id 
+    setTasks(prev => prev.map(t =>
+      t.id === id
         ? { ...t, status, updatedAt: new Date().toISOString() }
         : t
     ));
@@ -122,14 +109,15 @@ export const useTasks = (projectId: string) => {
     try {
       const updated = await tasksApi.updateStatus(id, status);
       setTasks(prev => prev.map(t => t.id === id ? updated : t));
+      addToast({ message: 'Task status updated', type: 'success' });
+      return updated;
     } catch (err) {
-      // Rollback on error
       setTasks(prev => prev.map(t => t.id === id ? oldTask : t));
-      const message = err instanceof Error ? err.message : 'Failed to update task status';
-      showToast(message, 'error');
+      const message = err instanceof Error ? err.message : 'Failed to update status';
+      addToast({ message, type: 'error' });
       throw err;
     }
-  }, [tasks, showToast]);
+  }, [tasks, addToast]);
 
   return {
     tasks,
@@ -139,6 +127,5 @@ export const useTasks = (projectId: string) => {
     updateTask,
     deleteTask,
     updateTaskStatus,
-    refetch: fetchTasks,
   };
 };

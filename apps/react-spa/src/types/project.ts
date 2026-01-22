@@ -24,3 +24,11 @@ export interface UpdateProjectDto {
   description?: string;
   status?: ProjectStatus;
 }
+
+export interface ProjectsResponse {
+  projects: Project[];
+  total: number;
+  page?: number;
+  pageSize?: number;
+  totalPages?: number;
+}

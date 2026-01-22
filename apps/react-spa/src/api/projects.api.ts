@@ -6,12 +6,16 @@ import type {
   CreateProjectDto, 
   UpdateProjectDto 
 } from '../types/project.ts';
+import type { ProjectFilters, PaginationParams } from '../utils/filterTypes';
 
 const USE_MOCK_API = true;
 
 export const projectsApi = {
-  getProjects: async (): Promise<ProjectsResponse> => {
-    if (USE_MOCK_API) return mockApi.getProjects();
+  getProjects: async (
+    filters?: ProjectFilters,
+    pagination?: PaginationParams
+  ): Promise<ProjectsResponse> => {
+    if (USE_MOCK_API) return mockApi.getProjects(filters, pagination);
     return apiClient.get<ProjectsResponse>('/projects');
   },
 
