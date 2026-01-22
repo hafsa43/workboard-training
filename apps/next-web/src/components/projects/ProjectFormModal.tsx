@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { projectCreateSchema, projectUpdateSchema, type ProjectCreateFormData } from '@/schemas/project.schema';
+import { projectCreateSchema, projectUpdateSchema, type ProjectCreateFormData, type ProjectUpdateFormData } from '@/schemas/project.schema';
 import { Input } from '../ui/Input';
 import { FormTextarea } from '../forms/FormTextarea';
 import { Button } from '../ui/Button';
@@ -32,7 +32,7 @@ export function ProjectFormModal({
     reset,
     formState: { errors },
   } = useForm<any>({
-    resolver: zodResolver(mode === 'edit' ? projectUpdateSchema : projectCreateSchema),
+    resolver: zodResolver(mode === 'edit' ? projectUpdateSchema : projectCreateSchema) as any,
     defaultValues: initialData ? {
       name: initialData.name,
       description: initialData.description || '',
@@ -40,7 +40,7 @@ export function ProjectFormModal({
     } : undefined,
   });
 
-  const handleFormSubmit = async (data: ProjectCreateFormData) => {
+  const handleFormSubmit = async (data: any) => {
     try {
       await onSubmit(data);
       reset();

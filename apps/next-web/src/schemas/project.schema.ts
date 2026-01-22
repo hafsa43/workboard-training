@@ -18,8 +18,7 @@ export const projectUpdateSchema = z.object({
     .string()
     .min(2, 'Project name must be at least 2 characters')
     .max(80, 'Project name must not exceed 80 characters')
-    .trim()
-    .optional(),
+    .trim(),
   description: z
     .string()
     .max(500, 'Description must not exceed 500 characters')
