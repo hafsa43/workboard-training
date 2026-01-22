@@ -2,29 +2,6 @@
 
 **Date**: January 9, 2026
 
-## What
-Added Vitest + React Testing Library + MSW for comprehensive testing infrastructure
-
-## Why
-No test coverage existed. Need reliable automated tests for development confidence and CI/CD pipeline.
-
-## How
-- Configured Vitest with happy-dom environment and V8 coverage
-- Set up MSW for API mocking (Projects, Tasks endpoints)
-- Added unit tests for stores (authStore, uiStore) and utilities (secureStorage, useDebounce)
-- Added component tests for forms (FormInput) and UI (TaskCard, ProjectFilters)
-- Created custom render utilities with React Router + React Query providers
-- Fixed type imports for verbatimModuleSyntax compliance
-- Configured path alias (@/) in tsconfig
-
-## Tests
-- [x] Tests passing: 32/32 across 9 test files
-- [x] Coverage: 32% overall (100% on tested modules)
-- [x] Performance: ~8.7s with coverage
-- [x] Zero flaky tests
-
----
-
 ## Results
 - **9 test files | 32 tests passed**  
 - **Coverage**: 32% overall, 100% on tested modules  
@@ -227,4 +204,46 @@ act(() => vi.advanceTimersByTime(500) );
 - uses: actions/setup-node@v3
 - run: npm ci
 - run: npm run test:run
-- run: npm 
+- run: npm run test:coverage
+```
+
+---
+
+## Best Practices
+
+- Separate __tests__ folders per module
+- Clear test names ("should X when Y")
+- Arrange-Act-Assert pattern
+- Test independence (beforeEach resets)
+- happy-dom for speed
+- Type-safe mocks
+
+---
+
+## Key Learnings
+
+1. Vitest is fast (8.7s for 32 tests with coverage)
+2. MSW provides clean API mocking
+3. happy-dom is sufficient for most tests
+4. act() warnings matter - wrap state updates
+5. Fake timers must be in act() blocks
+6. Custom render encapsulates provider setup
+7. Mock at API boundary, not implementation
+
+---
+
+## Files Created
+
+- vitest.config.ts
+- src/test/setup.ts
+- src/test/utils.tsx
+- src/test/mocks/handlers.ts
+- src/test/mocks/server.ts
+- src/test/mocks/browser.ts
+- 9 test files
+
+---
+
+## Tomorrow
+
+**Day 11: Next.js App Router** - Routing, layouts, server/client components
